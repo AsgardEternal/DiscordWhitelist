@@ -1,14 +1,8 @@
-import discord
 from os import environ
 from sys import stderr
-
-
-class WhiteLister(discord.Client):
-    async def on_ready(self):
-        print(f"Logged on as {self.user}")
-
-    async def on_message(self, message):
-        print(f"Message from {message.author}: {message.content}")
+from multiprocessing import Process
+import autowl.fileServer as fileServer
+import autowl.discordBot as discordBot
 
 
 # main runtime function
@@ -20,14 +14,16 @@ def main():
         print("Unable to access DISCORD_TOKEN in environment!", file=stderr)
         exit(1)
 
-    intents = discord.Intents.default()
-    intents.message_content = True
+    fsproc = Process(target=fileServer.startServer)
+    disbot = Process(target=discordBot.startBot, args=(disToken,))
 
-    client = WhiteLister(intents=intents)
-    try:
-        client.run(disToken)
-    except:
-        print("Invalid discord token!", file=stderr)
+    fsproc.start()
+    disbot.start()
+
+    fsproc.join()
+    disbot.join()
+
+    exit(0)
 
 
 main()

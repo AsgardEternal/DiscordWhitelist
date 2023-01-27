@@ -12,6 +12,7 @@ def init():
         print("Unable to find discord token in environment!", file=stderr)
         exit(1)
 
+
     print(f"discord token:{distoken}")
 
 
