@@ -1,4 +1,5 @@
 import os
+from sys import stderr
 import discord
 
 
@@ -6,14 +7,12 @@ import discord
 def init():
     # make sure this prints the discord token
     # set this up as a runtime environment variable, DO NOT HARDCODE THE TOKEN
-    try:
-        disToken = os.environ[
-            'DISCORD_TOKEN']  # grabs the discord token from the environment variable, if not there, exit
-    except:
-        print("ERROR: unable to find discord token in environment variables!")
+    distoken = os.environ.get("DISCORD_TOKEN")
+    if not distoken:
+        print("Unable to find discord token in environment!", file=stderr)
         exit(1)
 
-    print("discord Token:"+disToken)
+    print(f"discord token:{distoken}")
 
 
 init()
