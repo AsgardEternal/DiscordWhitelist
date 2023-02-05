@@ -2,12 +2,11 @@
   "WhiteListGroupName": {
     "permissions": [],
     "discord_role_id": "",
-    "members": [
-      {
-        "discord_id": "",
+    "members": {
+      "discord_id": {
         "steam64": "",
         "discord_username": ""
       }
-    ]
+    }
   }
 }
