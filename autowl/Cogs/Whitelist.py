@@ -21,7 +21,9 @@ class Whitelist(commands.Cog):
             for group in self.client.whitelist:
                 if role.id == group.discord_role_id:
                     steam64_updated = True
-                    group.members[ctx.author.id] = config.WhitelistMember(ctx.author.name, steam64)
+                    group.members[ctx.author.id] = config.WhitelistMember(
+                        ctx.author.name, steam64
+                    )
 
         if steam64_updated:
             ctx.reply(f"Updated {ctx.author.name}'s whitelist steam64 to {steam64}!")

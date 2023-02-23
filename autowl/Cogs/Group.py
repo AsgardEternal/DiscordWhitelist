@@ -15,7 +15,6 @@ class Group(commands.Cog, name="group"):
         interaction: discord.Interaction,
         role: discord.Role,
     ):
-
         if self.client.whitelist.get(role.name):
             await interaction.response.send_message(
                 f"**{role.name}** is already added, cannot add it again!"
@@ -113,6 +112,5 @@ class Group(commands.Cog, name="group"):
         dropdown.callback = perms_handler
 
         ctx: commands.Context = await self.client.get_context(interaction)
-
 
         await ctx.send(view=view)
