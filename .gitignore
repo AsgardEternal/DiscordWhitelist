@@ -130,3 +130,5 @@ dmypy.json
 
 # Ignore Intellij files
 .idea/
+
+.envrc
