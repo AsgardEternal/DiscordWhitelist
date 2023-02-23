@@ -1,4 +1,5 @@
 import discord
+import random
 import logging
 from autowl import config
 from autowl.bot import Bot
@@ -50,3 +51,32 @@ class Group(commands.Cog, name="group"):
             f"Removed **{role.name}** from Whitelisted roles"
         )
         self.client.whitelist.pop(role.name)
+
+    @app_commands.command()
+    async def list_whitelisted_roles(self, interaction: discord.Interaction):
+        whitelisted_roles = []
+        if not interaction.guild:
+            await interaction.response.send_message(
+                "This command must be ran within a discord server"
+            )
+            return
+
+        for group in self.client.whitelist:
+            role_id = self.client.whitelist[group].discord_role_id
+            if not interaction.guild.get_role(role_id):
+                continue
+            whitelisted_roles.append(f"<@&{role_id}>")
+
+        embed_description = (
+            "\n".join(whitelisted_roles)
+            if whitelisted_roles
+            else "No whitelisted roles found, you can some using `/add`"
+        )
+
+        embed = discord.Embed(
+            title="Whitelisted Roles",
+            description=embed_description,
+            color=random.randint(0, 0xFFFFFF),
+        ).set_footer(text="Users with these roles will be whitelisted on Squad")
+
+        await interaction.response.send_message(embed=embed)
