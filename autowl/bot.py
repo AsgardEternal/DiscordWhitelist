@@ -20,6 +20,9 @@ class Bot(commands.Bot):
             help_command=commands.DefaultHelpCommand(dm_help=True),
         )
 
+    async def on_command(self, ctx: commands.Context):
+        log.info(f"{ctx.author} ({ctx.author.id}) invoked command: {ctx.command.name}, {ctx.message}")
+
     async def on_ready(self):
         log.info(f"Logged in as '{self.user}' ({self.user.id})")
         log.info(
