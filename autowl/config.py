@@ -14,7 +14,6 @@ class WhitelistMember:
 
 @dataclass
 class WhitelistGroup:
-    permissions: list[str]
     discord_role_id: int
     members: dict[int, WhitelistMember]
 
@@ -26,9 +25,3 @@ class Whitelist:
     def __iter__(self):
         for key in self.whitelist:
             yield self.whitelist[key]
-
-
-@dataclass
-class PermGroup:
-    group_name: str
-    permissions: list[str]
