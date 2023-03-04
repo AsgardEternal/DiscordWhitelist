@@ -10,10 +10,13 @@ log = logging.getLogger(__name__)
 class Bot(commands.Bot):
     whitelist = config.Whitelist({}).whitelist
 
-    infile = open("test.json", "r")
-    if infile:
-        whitelist = jsonpickle.decode(infile.read())
-        infile.close()
+    try:
+        infile = open("test.json", "r")
+        if infile:
+            whitelist = jsonpickle.decode(infile.read())
+            infile.close()
+    except:
+        pass
 
     def __init__(self, config: config.DiscordClientConfig):
         self.config = config
