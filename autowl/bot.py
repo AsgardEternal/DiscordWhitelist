@@ -1,3 +1,4 @@
+import jsonpickle
 import logging
 import discord
 from discord.ext import commands
@@ -8,6 +9,11 @@ log = logging.getLogger(__name__)
 
 class Bot(commands.Bot):
     whitelist = config.Whitelist({}).whitelist
+
+    infile = open("test.json", "r")
+    if infile:
+        whitelist = jsonpickle.decode(infile.read())
+        infile.close()
 
     def __init__(self, config: config.DiscordClientConfig):
         self.config = config

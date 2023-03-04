@@ -1,3 +1,4 @@
+import jsonpickle
 import discord
 import logging
 from autowl import config
@@ -37,6 +38,9 @@ class Whitelist(commands.Cog):
                     ] = config.WhitelistMember(interaction.user.name, steam64)
 
         if steam64_updated:
+            outFile = open("test.json", "w")
+            outFile.write(jsonpickle.encode(self.client.whitelist, unpicklable=False))
+            outFile.close()
             log.info(
                 f"Updated {interaction.user.name}'s ({interaction.user.id}) whitelist steam64 to {steam64}"
             )
