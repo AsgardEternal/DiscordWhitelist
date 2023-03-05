@@ -30,7 +30,7 @@ class WhitelistGroup:
         self.members = {}
 
     def delGroup(self):
-        os.remove(f"./wlgrps/{self.name}")
+        os.remove(f"./wlgrps/{self.name}.cfg")
         os.remove(f"./wlgrps/{self.name}.json")
 
     def updateFile(self):
@@ -39,7 +39,7 @@ class WhitelistGroup:
         outFile.close()
 
     def updateWL(self):
-        wlFile = open(f"./wlgrps/{self.name}", "w")
+        wlFile = open(f"./wlgrps/{self.name}.cfg", "w")
         wlFile.write(f"Group={self.name}:{self.squadPerms}\n")
         wlFile.write("\n")
         wlFile.write(f"//{self.name}\n")
