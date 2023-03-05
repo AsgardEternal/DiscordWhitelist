@@ -1,3 +1,5 @@
+import os.path
+
 import jsonpickle
 import logging
 import discord
@@ -8,15 +10,17 @@ log = logging.getLogger(__name__)
 
 
 class Bot(commands.Bot):
-    whitelist = config.Whitelist({}).whitelist
+    whitelistGrps = {}
 
-    try:
-        infile = open("test.json", "r")
-        if infile:
-            whitelist = jsonpickle.decode(infile.read())
-            infile.close()
-    except:
-        pass
+    if not os.path.exists('./wlgrps'):
+        os.makedirs('./wlgrps')
+    else:
+        for wlfile in os.listdir('./wlgrps'):
+            filename = os.fsdecode(wlfile)
+            if filename.endswith('.json'):
+                file = open(f'./wlgrps/{filename}', 'r')
+                wlgrp: config.WhitelistGroup = jsonpickle.decode(file.read())
+                whitelistGrps[wlgrp.discord_role_id] = wlgrp
 
     def __init__(self, config: config.DiscordClientConfig):
         self.config = config
@@ -45,6 +49,19 @@ class Bot(commands.Bot):
             log.info(f"Synced guild: {guild.name}")
 
         await self.tree.sync()
+
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        log.info(f"Updating {after.name} ({after.id})")
+        rmroles = []
+        for befrole in before.roles:
+            rmroles.append(befrole.id)
+        for aftrole in after.roles:
+            for befrole in before.roles:
+                if befrole.id == aftrole.id:
+                    rmroles.remove(aftrole.id)
+        log.info(f"roles found to remove from {after.name}: {rmroles}")
+        for rmroleid in rmroles:
+            self.whitelistGrps[rmroleid].delMember(before.id)
 
     async def setup_hook(self):
         log.info("Setting up bot")

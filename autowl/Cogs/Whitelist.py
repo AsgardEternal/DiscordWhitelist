@@ -1,4 +1,3 @@
-import jsonpickle
 import discord
 import logging
 from autowl import config
@@ -22,7 +21,7 @@ class Whitelist(commands.Cog):
             )
             return
 
-        if not len(self.client.whitelist.keys()):
+        if not len(self.client.whitelistGrps.keys()):
             await interaction.response.send_message(
                 "There are no Whitelist roles defined, unable to continue!"
             )
@@ -30,26 +29,13 @@ class Whitelist(commands.Cog):
 
         steam64_updated = False
         for role in interaction.user.roles:
-            for group in self.client.whitelist:
-                if role.id == self.client.whitelist[group].discord_role_id:
+            for group in self.client.whitelistGrps:
+                if role.id == self.client.whitelistGrps[group].discord_role_id:
                     steam64_updated = True
-                    self.client.whitelist[group].members[
-                        str(interaction.user.id)
-                    ] = config.WhitelistMember(interaction.user.name, steam64)
+                    memb = config.WhitelistMember(interaction.user.id, interaction.user.name, steam64)
+                    self.client.whitelistGrps[group].addMember(memb)
 
         if steam64_updated:
-            outFile = open("test.json", "w")
-            outFile.write(jsonpickle.encode(self.client.whitelist))
-            outFile.close()
-            wlFile = open("testwl", "w")
-            for wlgrp in self.client.whitelist:
-                wlFile.write(f"Group={wlgrp}:reserve\n")
-            for wlgrp in self.client.whitelist:
-                wlFile.write("\n")
-                wlFile.write(f"//{wlgrp}\n")
-                for wlmem in self.client.whitelist[wlgrp].members:
-                    wlFile.write(f"Admin={self.client.whitelist[wlgrp].members[wlmem].steam64}:{wlgrp} //{self.client.whitelist[wlgrp].members[wlmem].discord_username} ({wlmem})\n")
-            wlFile.close()
             log.info(
                 f"Updated {interaction.user.name}'s ({interaction.user.id}) whitelist steam64 to {steam64}"
             )

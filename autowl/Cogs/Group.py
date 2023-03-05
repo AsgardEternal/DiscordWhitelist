@@ -20,7 +20,7 @@ class Group(commands.Cog, name="group"):
         interaction: discord.Interaction,
         role: discord.Role,
     ):
-        if self.client.whitelist.get(role.name):
+        if self.client.whitelistGrps.get(role.name):
             await interaction.response.send_message(
                 f"**{role.name}** is already added, cannot add it again!"
             )
@@ -30,8 +30,29 @@ class Group(commands.Cog, name="group"):
         await interaction.response.send_message(
             f"Adding **{role.name}** as a Whitelist role"
         )
-        self.client.whitelist[f"{role.name}"] = config.WhitelistGroup(
-            discord_role_id=role.id, members={}
+        self.client.whitelistGrps[role.id] = config.WhitelistGroup(
+            name=role.name, roleID=role.id, permissions='reserve'
+        )
+
+    @app_commands.command()
+    async def addperm(
+            self,
+            interaction: discord.Interaction,
+            role: discord.Role,
+            perms: str
+    ):
+        if self.client.whitelistGrps.get(role.name):
+            await interaction.response.send_message(
+                f"**{role.name}** is already added, cannot add it again!"
+            )
+            return
+
+        log.info(f"Adding {role.name} ({role.id}) as a Whitelist role")
+        await interaction.response.send_message(
+            f"Adding **{role.name}** as a Whitelist role"
+        )
+        self.client.whitelistGrps[role.id] = config.WhitelistGroup(
+            name=role.name, roleID=role.id, permissions=perms
         )
 
     @app_commands.command()
@@ -40,7 +61,7 @@ class Group(commands.Cog, name="group"):
         interaction: discord.Interaction,
         role: discord.Role,
     ):
-        if not self.client.whitelist.get(role.name):
+        if not self.client.whitelistGrps.get(role.id):
             await interaction.response.send_message(
                 f"**{role.name}** has not been added as a whitelisted group, unable to remove!"
             )
@@ -50,7 +71,8 @@ class Group(commands.Cog, name="group"):
         await interaction.response.send_message(
             f"Removed **{role.name}** from Whitelisted roles"
         )
-        self.client.whitelist.pop(role.name)
+        self.client.whitelistGrps[role.id].delGroup()
+        self.client.whitelistGrps.pop(role.id)
 
     @app_commands.command()
     async def list_whitelisted_roles(self, interaction: discord.Interaction):
@@ -61,8 +83,8 @@ class Group(commands.Cog, name="group"):
             )
             return
 
-        for group in self.client.whitelist:
-            role_id = self.client.whitelist[group].discord_role_id
+        for group in self.client.whitelistGrps:
+            role_id = self.client.whitelistGrps[group].discord_role_id
             if not interaction.guild.get_role(role_id):
                 continue
             whitelisted_roles.append(f"<@&{role_id}>")
