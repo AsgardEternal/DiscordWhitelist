@@ -75,7 +75,7 @@ class Bot(commands.Bot):
                     rmroles.remove(aftrole.id)
         log.info(f"roles found to remove from {disusername}: {rmroles}")
         for rmroleid in rmroles:
-            if not rmroleid in self.whitelistGrps.keys():
+            if not(rmroleid in self.whitelistGrps.keys()):
                 continue
             self.whitelistGrps[rmroleid].delMember(before.id)
 
@@ -88,7 +88,7 @@ class Bot(commands.Bot):
                     addroles.remove(befrole.id)
         log.info(f"roles found to add to {disusername}: {addroles}")
         for addroleid in addroles:
-            if not addroleid in self.whitelistGrps.keys():
+            if not(addroleid in self.whitelistGrps.keys()):
                 continue
             self.whitelistGrps[addroleid].addMember(config.WhitelistMember(after.id, disusername, userdata[0]))
         self.squadjs.commit()

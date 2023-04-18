@@ -27,14 +27,17 @@ class Group(commands.Cog, name="group"):
         membsup = []
         for memb in role.members:
             membsup.append(memb.id)
-        memupcur = self.client.squadjs.cursor(buffered=True)
-        in_params = ','.join(['%s'] * len(membsup))
-        sqlstate = "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
-        memupcur.execute(sqlstate, membsup)
+        if len(membsup) > 0:
+            memupcur = self.client.squadjs.cursor(buffered=True)
+            in_params = ','.join(['%s'] * len(membsup))
+            sqlstate = "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
+            log.info(sqlstate)
+            memupcur.execute(sqlstate, membsup)
 
-        udata = memupcur.fetchall()
-        for data in udata:
-            self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
+            udata = memupcur.fetchall()
+            for data in udata:
+                self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
+
         await interaction.response.send_message("Whitelist group successfully added/updated")
         self.client.squadjs.commit()
 
