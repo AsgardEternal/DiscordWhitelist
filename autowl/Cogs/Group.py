@@ -14,34 +14,8 @@ class Group(commands.Cog, name="group"):
     def __init__(self, client: Bot):
         self.client = client
 
-    @app_commands.command()
-    async def add(
-        self,
-        interaction: discord.Interaction,
-        role: discord.Role,
-    ):
-        if self.client.whitelistGrps.get(role.name):
-            await interaction.response.send_message(
-                f"**{role.name}** is already added, cannot add it again!"
-            )
-            return
-
-        log.info(f"Adding {role.name} ({role.id}) as a Whitelist role")
-        await interaction.response.send_message(
-            f"Adding **{role.name}** as a Whitelist role"
-        )
-        self.client.whitelistGrps[role.id] = config.WhitelistGroup(
-            name=role.name, roleID=role.id, permissions='reserve'
-        )
-
-    @app_commands.command()
-    async def addperm(
-            self,
-            interaction: discord.Interaction,
-            role: discord.Role,
-            perms: str
-    ):
-        if self.client.whitelistGrps.get(role.name):
+    async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
+        if role.id in self.client.whitelistGrps.keys():
             await interaction.response.send_message(
                 f"**{role.name}** is already added, cannot add it again!"
             )
@@ -54,6 +28,35 @@ class Group(commands.Cog, name="group"):
         self.client.whitelistGrps[role.id] = config.WhitelistGroup(
             name=role.name, roleID=role.id, permissions=perms
         )
+        membsup = []
+        for memb in role.members:
+            membsup.append(memb.id)
+        memupcur = self.client.squadjs.cursor(buffered=True)
+        in_params = ','.join(['%s'] * len(membsup))
+        sqlstate = "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
+        memupcur.execute(sqlstate, membsup)
+
+        udata = memupcur.fetchall()
+        for data in udata:
+            self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], "unknown", data[0]))
+        self.client.squadjs.commit()
+
+    @app_commands.command()
+    async def add(
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role,
+    ):
+        await self.baseperm(interaction, role, "reserve")
+
+    @app_commands.command()
+    async def addperm(
+            self,
+            interaction: discord.Interaction,
+            role: discord.Role,
+            perms: str
+    ):
+        await self.baseperm(interaction, role, perms)
 
     @app_commands.command()
     async def remove(

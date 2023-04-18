@@ -3,6 +3,7 @@ import os.path
 import jsonpickle
 import logging
 import discord
+import mysql.connector
 from discord.ext import commands
 from autowl import config
 
@@ -10,6 +11,12 @@ log = logging.getLogger(__name__)
 
 
 class Bot(commands.Bot):
+    squadjs_updateDiscordID = ("UPDATE DBLog_SteamUsers SET discordID = %s "
+                               "WHERE steamID = %s")
+
+    squadjs_findByDiscordID = ("SELECT * FROM DBLog_SteamUsers "
+                               "WHERE discordID = %s")
+
     whitelistGrps = {}
 
     if not os.path.exists('./wlgrps'):
@@ -22,7 +29,7 @@ class Bot(commands.Bot):
                 wlgrp: config.WhitelistGroup = jsonpickle.decode(file.read())
                 whitelistGrps[wlgrp.discord_role_id] = wlgrp
 
-    def __init__(self, config: config.DiscordClientConfig):
+    def __init__(self, config: config.DiscordClientConfig, mysqlpass):
         self.config = config
         intents = discord.Intents.default()
         intents.message_content = True
@@ -32,6 +39,7 @@ class Bot(commands.Bot):
             intents=intents,
             help_command=commands.DefaultHelpCommand(dm_help=True),
         )
+        self.squadjs = mysql.connector.connect(user='squadjs', password=mysqlpass, host='asgard.orion-technologies.io', database='squadjs')
 
     async def on_command(self, ctx: commands.Context):
         log.info(f"{ctx.author} ({ctx.author.id}) invoked command: {ctx.command.name}, {ctx.message}")
@@ -51,6 +59,11 @@ class Bot(commands.Bot):
         await self.tree.sync()
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
+        findcur = self.squadjs.cursor(buffered=True)
+        findcur.execute(self.squadjs_findByDiscordID, [f"{after.id}"])
+        if findcur.arraysize <= 0:
+            return
+        userdata = findcur.fetchone()
         log.info(f"Updating {after.name} ({after.id})")
         rmroles = []
         for befrole in before.roles:
@@ -61,7 +74,23 @@ class Bot(commands.Bot):
                     rmroles.remove(aftrole.id)
         log.info(f"roles found to remove from {after.name}: {rmroles}")
         for rmroleid in rmroles:
+            if not rmroleid in self.whitelistGrps.keys():
+                continue
             self.whitelistGrps[rmroleid].delMember(before.id)
+
+        addroles = []
+        for aftrole in after.roles:
+            addroles.append(aftrole.id)
+        for befrole in before.roles:
+            for aftrole in after.roles:
+                if aftrole.id == befrole.id:
+                    addroles.remove(befrole.id)
+        log.info(f"roles found to add to {after.name}: {addroles}")
+        for addroleid in addroles:
+            if not addroleid in self.whitelistGrps.keys():
+                continue
+            self.whitelistGrps[addroleid].addMember(config.WhitelistMember(after.id, after.nick, userdata[0]))
+        self.squadjs.commit()
 
     async def setup_hook(self):
         log.info("Setting up bot")
