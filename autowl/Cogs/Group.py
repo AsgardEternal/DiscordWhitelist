@@ -16,16 +16,10 @@ class Group(commands.Cog, name="group"):
 
     async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
         if role.id in self.client.whitelistGrps.keys():
-            await interaction.response.send_message(
-                f"**{role.name}** is already added, overwriting permissions..."
-            )
             self.client.whitelistGrps[role.id].squadPerms = perms
             self.client.whitelistGrps[role.id].updateGroup()
         else:
             log.info(f"Adding {role.name} ({role.id}) as a Whitelist role")
-            await interaction.response.send_message(
-                f"Adding **{role.name}** as a Whitelist role"
-            )
             self.client.whitelistGrps[role.id] = config.WhitelistGroup(
                 name=role.name, roleID=role.id, permissions=perms
             )

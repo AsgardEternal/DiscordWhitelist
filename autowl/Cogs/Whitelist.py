@@ -29,6 +29,7 @@ class Whitelist(commands.Cog):
         except mysql.connector.Error as err:
             log.error("MYSQL error!")
             await interaction.response.send_message("Could not find steamID!")
+            return
         for urole in interaction.user.roles:
             if urole.id in self.client.whitelistGrps.keys():
                 disusername = interaction.user.nick if interaction.user.nick is not None else interaction.user.name
