@@ -33,7 +33,7 @@ class Whitelist(commands.Cog):
             if urole.id in self.client.whitelistGrps.keys():
                 self.client.whitelistGrps[urole.id].addMember(config.WhitelistMember(interaction.user.id, interaction.user.nick, steam64))
         self.client.squadjs.commit()
-        interaction.response.send_message("SteamID is linked, roles updated.")
+        await interaction.response.send_message("SteamID is linked, roles updated.")
 
     #
     # @app_commands.command()
