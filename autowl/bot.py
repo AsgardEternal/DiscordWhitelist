@@ -50,11 +50,11 @@ class Bot(commands.Bot):
             f"Have access to the following guilds: "
             f"{', '.join([str(guild.name) + ' (' + str(guild.id) + ')' for guild in self.guilds])}"
         )
-
-        for guild in self.guilds:
-            self.tree.copy_global_to(guild=guild)
-            await self.tree.sync(guild=guild)
-            log.info(f"Synced guild: {guild.name}")
+        #
+        # for guild in self.guilds:
+        #     self.tree.copy_global_to(guild=guild)
+        #     await self.tree.sync(guild=guild)
+        #     log.info(f"Synced guild: {guild.name}")
 
         await self.tree.sync()
 
