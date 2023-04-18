@@ -28,7 +28,15 @@ class Whitelist(commands.Cog):
             updatecur.execute(self.client.squadjs_updateDiscordID, (interaction.user.id, steam64))
             rowsaffected = updatecur.rowcount
             if rowsaffected <= 0:
-                await interaction.response.send_message("Cound not find SteamID or already linked!")
+                updatecur.execute(self.client.squadjs_findByDiscordID, [interaction.user.id])
+                if updatecur.rowcount <= 0:
+                    await interaction.response.send_message("Cound not find SteamID!")
+                else:
+                    for urole in interaction.user.roles:
+                        if urole.id in self.client.whitelistGrps.keys():
+                            self.client.whitelistGrps[urole.id].members[f"{interaction.user.id}"].steam64 = steam64
+                            self.client.whitelistGrps[urole.id].updateGroup()
+                    await interaction.response.send_message("SteamID already linked, roles updated.")
                 self.client.squadjs.commit()
                 return
         except mysql.connector.Error as err:
