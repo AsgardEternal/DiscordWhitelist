@@ -33,6 +33,10 @@ class WhitelistGroup:
         os.remove(f"./wlgrps/{self.name}.cfg")
         os.remove(f"./wlgrps/{self.name}.json")
 
+    def updateGroup(self):
+        self.updateFile()
+        self.updateWL()
+
     def updateFile(self):
         outFile = open(f"./wlgrps/{self.name}.json", "w")
         outFile.write(jsonpickle.encode(self))
