@@ -48,4 +48,4 @@ class Whitelist(commands.Cog):
                 disusername = interaction.user.nick if interaction.user.nick is not None else interaction.user.name
                 self.client.whitelistGrps[urole.id].addMember(config.WhitelistMember(interaction.user.id, disusername, steam64))
         self.client.squadjs.commit()
-        await interaction.response.send_message(f"discord is linked to steamID {steam64}, roles updated.")
+        await interaction.response.send_message(f"discord is linked to steamID, roles updated.")
