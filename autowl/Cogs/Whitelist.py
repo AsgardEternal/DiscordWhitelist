@@ -25,14 +25,17 @@ class Whitelist(commands.Cog):
             return
         updatecur = self.client.squadjs.cursor(buffered=True)
         try:
-            updatecur.execute(self.client.squadjs_updateDiscordID, (interaction.user.id, steam64))
+            if updatecur.execute(self.client.squadjs_updateDiscordID, (interaction.user.id, steam64)) <= 0:
+                await interaction.response.send_message("Cound not find SteamID!")
+                self.client.squadjs.commit()
+                return
         except mysql.connector.Error as err:
             log.error("MYSQL error!")
-            await interaction.response.send_message("Could not find steamID!")
+            await interaction.response.send_message("There was an internal server error, pls contact skillet")
             return
         for urole in interaction.user.roles:
             if urole.id in self.client.whitelistGrps.keys():
                 disusername = interaction.user.nick if interaction.user.nick is not None else interaction.user.name
                 self.client.whitelistGrps[urole.id].addMember(config.WhitelistMember(interaction.user.id, disusername, steam64))
         self.client.squadjs.commit()
-        await interaction.response.send_message("SteamID is linked, roles updated.")
+        await interaction.response.send_message(f"discord is linked to steamID {steam64}, roles updated.")
