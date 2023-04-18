@@ -59,12 +59,13 @@ class Bot(commands.Bot):
         await self.tree.sync()
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
+        disusername = after.user.nick if after.user.nick is not None else after.user.name
         findcur = self.squadjs.cursor(buffered=True)
         findcur.execute(self.squadjs_findByDiscordID, [f"{after.id}"])
         if findcur.arraysize <= 0:
             return
         userdata = findcur.fetchone()
-        log.info(f"Updating {after.name} ({after.id})")
+        log.info(f"Updating {disusername} ({after.id})")
         rmroles = []
         for befrole in before.roles:
             rmroles.append(befrole.id)
@@ -72,7 +73,7 @@ class Bot(commands.Bot):
             for befrole in before.roles:
                 if befrole.id == aftrole.id:
                     rmroles.remove(aftrole.id)
-        log.info(f"roles found to remove from {after.name}: {rmroles}")
+        log.info(f"roles found to remove from {disusername}: {rmroles}")
         for rmroleid in rmroles:
             if not rmroleid in self.whitelistGrps.keys():
                 continue
@@ -85,11 +86,11 @@ class Bot(commands.Bot):
             for aftrole in after.roles:
                 if aftrole.id == befrole.id:
                     addroles.remove(befrole.id)
-        log.info(f"roles found to add to {after.name}: {addroles}")
+        log.info(f"roles found to add to {disusername}: {addroles}")
         for addroleid in addroles:
             if not addroleid in self.whitelistGrps.keys():
                 continue
-            self.whitelistGrps[addroleid].addMember(config.WhitelistMember(after.id, after.nick, userdata[0]))
+            self.whitelistGrps[addroleid].addMember(config.WhitelistMember(after.id, disusername, userdata[0]))
         self.squadjs.commit()
 
     async def setup_hook(self):
