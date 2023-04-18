@@ -41,7 +41,7 @@ class Group(commands.Cog, name="group"):
         udata = memupcur.fetchall()
         for data in udata:
             self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
-        interaction.response.send_message("Whitelist group successfully added/updated")
+        await interaction.response.send_message("Whitelist group successfully added/updated")
         self.client.squadjs.commit()
 
     @app_commands.command()
