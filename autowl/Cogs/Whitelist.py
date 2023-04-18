@@ -25,7 +25,8 @@ class Whitelist(commands.Cog):
             return
         updatecur = self.client.squadjs.cursor(buffered=True)
         try:
-            if updatecur.execute(self.client.squadjs_updateDiscordID, (interaction.user.id, steam64)) <= 0:
+            rowsaffected = updatecur.execute(self.client.squadjs_updateDiscordID, (interaction.user.id, steam64))
+            if rowsaffected <= 0:
                 await interaction.response.send_message("Cound not find SteamID!")
                 self.client.squadjs.commit()
                 return
