@@ -59,7 +59,7 @@ class Bot(commands.Bot):
         await self.tree.sync()
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        disusername = after.user.nick if after.user.nick is not None else after.user.name
+        disusername = after.nick if after.nick is not None else after.name
         findcur = self.squadjs.cursor(buffered=True)
         findcur.execute(self.squadjs_findByDiscordID, [f"{after.id}"])
         if findcur.arraysize <= 0:
