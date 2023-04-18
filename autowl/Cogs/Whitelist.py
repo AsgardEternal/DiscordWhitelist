@@ -31,7 +31,8 @@ class Whitelist(commands.Cog):
             await interaction.response.send_message("Could not find steamID!")
         for urole in interaction.user.roles:
             if urole.id in self.client.whitelistGrps.keys():
-                self.client.whitelistGrps[urole.id].addMember(config.WhitelistMember(interaction.user.id, interaction.user.nick, steam64))
+                disusername = interaction.user.nick if interaction.user.nick is not None else interaction.user.name
+                self.client.whitelistGrps[urole.id].addMember(config.WhitelistMember(interaction.user.id, disusername, steam64))
         self.client.squadjs.commit()
         await interaction.response.send_message("SteamID is linked, roles updated.")
 
