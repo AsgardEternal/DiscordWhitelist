@@ -24,6 +24,7 @@ class Group(commands.Cog, name="group"):
                 name=role.name, roleID=role.id, permissions=perms
             )
 
+        await interaction.response.send_message("Whitelist group successfully added/updated")
         membsup = []
         for memb in role.members:
             membsup.append(memb.id)
@@ -38,7 +39,6 @@ class Group(commands.Cog, name="group"):
             for data in udata:
                 self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
 
-        await interaction.response.send_message("Whitelist group successfully added/updated")
         self.client.squadjs.commit()
 
     @app_commands.command()
