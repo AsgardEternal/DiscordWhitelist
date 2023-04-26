@@ -15,6 +15,7 @@ class Group(commands.Cog, name="group"):
         self.client = client
 
     async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
+        await interaction.response.send_message("Whitelist group successfully added/updated")
         if role.id in self.client.whitelistGrps.keys():
             self.client.whitelistGrps[role.id].squadPerms = perms
             self.client.whitelistGrps[role.id].updateGroup()
@@ -24,7 +25,6 @@ class Group(commands.Cog, name="group"):
                 name=role.name, roleID=role.id, permissions=perms
             )
 
-        await interaction.response.send_message("Whitelist group successfully added/updated")
         membsup = []
         for memb in role.members:
             membsup.append(memb.id)
