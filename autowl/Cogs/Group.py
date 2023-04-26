@@ -1,11 +1,13 @@
 import discord
 import random
 import logging
+
+import mysql.connector
+
 from autowl import config
 from autowl.bot import Bot
 from discord.ext import commands
 from discord import app_commands
-
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +17,7 @@ class Group(commands.Cog, name="group"):
         self.client = client
 
     async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
+
         await interaction.response.send_message("Whitelist group successfully added/updated")
         if role.id in self.client.whitelistGrps.keys():
             self.client.whitelistGrps[role.id].squadPerms = perms
@@ -25,11 +28,13 @@ class Group(commands.Cog, name="group"):
                 name=role.name, roleID=role.id, permissions=perms
             )
 
+        squadjs = mysql.connector.connect(user='squadjs', password=self.client.mysqlpass,
+                                          host='asgard.orion-technologies.io', database='squadjs', use_pure=False)
         membsup = []
         for memb in role.members:
             membsup.append(memb.id)
         if len(membsup) > 0:
-            memupcur = self.client.squadjs.cursor(buffered=True)
+            memupcur = squadjs.cursor(buffered=True)
             in_params = ','.join(['%s'] * len(membsup))
             sqlstate = "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
             log.info(sqlstate)
@@ -39,13 +44,14 @@ class Group(commands.Cog, name="group"):
             for data in udata:
                 self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
 
-        self.client.squadjs.commit()
+        squadjs.commit()
+        squadjs.close()
 
     @app_commands.command()
     async def add(
-        self,
-        interaction: discord.Interaction,
-        role: discord.Role,
+            self,
+            interaction: discord.Interaction,
+            role: discord.Role,
     ):
         await self.baseperm(interaction, role, "reserve")
 
@@ -60,9 +66,9 @@ class Group(commands.Cog, name="group"):
 
     @app_commands.command()
     async def remove(
-        self,
-        interaction: discord.Interaction,
-        role: discord.Role,
+            self,
+            interaction: discord.Interaction,
+            role: discord.Role,
     ):
         if not self.client.whitelistGrps.get(role.id):
             await interaction.response.send_message(

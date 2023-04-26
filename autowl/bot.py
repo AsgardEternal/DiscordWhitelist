@@ -39,7 +39,7 @@ class Bot(commands.Bot):
             intents=intents,
             help_command=commands.DefaultHelpCommand(dm_help=True),
         )
-        self.squadjs = mysql.connector.connect(user='squadjs', password=mysqlpass, host='asgard.orion-technologies.io', database='squadjs', use_pure=False)
+        self.mysqlpass = mysqlpass
 
     async def on_command(self, ctx: commands.Context):
         log.info(f"{ctx.author} ({ctx.author.id}) invoked command: {ctx.command.name}, {ctx.message}")

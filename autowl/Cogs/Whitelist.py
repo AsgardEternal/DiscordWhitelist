@@ -18,12 +18,13 @@ class Whitelist(commands.Cog):
 
     @app_commands.command()
     async def link(self, interaction: discord.Interaction, steam64: str):
+        squadjs = mysql.connector.connect(user='squadjs', password=self.client.mysqlpass, host='asgard.orion-technologies.io', database='squadjs', use_pure=False)
         if not interaction.guild:
             await interaction.response.send_message(
                 "This command must be ran within a discord server!"
             )
             return
-        updatecur = self.client.squadjs.cursor(buffered=True)
+        updatecur = squadjs.cursor(buffered=True)
         try:
             updatecur.execute(self.client.squadjs_updateDiscordID, (interaction.user.id, steam64))
             rowsaffected = updatecur.rowcount
@@ -37,7 +38,7 @@ class Whitelist(commands.Cog):
                             self.client.whitelistGrps[urole.id].members[f"{interaction.user.id}"].steam64 = steam64
                             self.client.whitelistGrps[urole.id].updateGroup()
                     await interaction.response.send_message("SteamID already linked, roles updated.")
-                self.client.squadjs.commit()
+                squadjs.commit()
                 return
         except mysql.connector.Error as err:
             log.error("MYSQL error!")
@@ -47,5 +48,6 @@ class Whitelist(commands.Cog):
             if urole.id in self.client.whitelistGrps.keys():
                 disusername = interaction.user.nick if interaction.user.nick is not None else interaction.user.name
                 self.client.whitelistGrps[urole.id].addMember(config.WhitelistMember(interaction.user.id, disusername, steam64))
-        self.client.squadjs.commit()
+        squadjs.commit()
+        squadjs.close()
         await interaction.response.send_message(f"discord is linked to steamID, roles updated.")
