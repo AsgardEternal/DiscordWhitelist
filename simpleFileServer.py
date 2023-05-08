@@ -23,6 +23,7 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                 grpfile += f"extgrps/{grpName}.cfg"
             else:
                 print("could not find admins file!", file=stderr)
+                return
             try:
                 file = open(grpfile, 'rb')
                 self.copyfile(file, self.wfile)
