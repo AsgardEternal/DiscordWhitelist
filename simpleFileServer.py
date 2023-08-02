@@ -1,9 +1,14 @@
 import http.server
 import os
+import re
 import socketserver
+import traceback
+import urllib.request
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from sys import stderr
+
+import requests
 
 PORT = 8000
 
@@ -26,10 +31,24 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                 return
             try:
                 file = open(grpfile, 'rb')
-                self.copyfile(file, self.wfile)
+                firstline = file.readline().decode('utf-8')
+                if firstline.startswith('remotelist='):
+                    remote = firstline.split('=')[1].strip()
+                    response = requests.get(remote, headers={'Accept': 'text/html,*/*'})
+                    responsetext = response.text
+                    config = file.read().decode('utf-8')
+                    confgrps = re.findall(r"^permissions/(.+)=(.+)", config, flags=re.M)
+                    baseperm = re.match(r"^permissions=(.+)", config, flags=re.M)
+                    responsetext = re.sub(r"^Group=(.+):(.+)", fr'Group=\1:{baseperm[0]}', responsetext, flags=re.M)
+                    for congrp in confgrps:
+                        responsetext = re.sub(rf"^Group=({congrp[0]}):(.+)", rf"Group=\1:{congrp[1]}", responsetext, flags=re.M)
+                    self.wfile.write(responsetext.encode('utf-8'))
+                else:
+                    self.copyfile(file, self.wfile)
                 file.close()
             except:
                 print('failed to open file!', file=stderr)
+                print(traceback.format_exc())
         return
 
 

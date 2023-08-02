@@ -1,3 +1,5 @@
+import os.path
+
 import discord
 import random
 import logging
@@ -63,6 +65,24 @@ class Group(commands.Cog, name="group"):
             perms: str
     ):
         await self.baseperm(interaction, role, perms)
+
+    @app_commands.command()
+    async def addremote(
+            self,
+            interaction: discord.Interaction,
+            shortname: str,
+            remoteURL: str,
+            perms: str = 'whitelist'
+    ):
+        if os.path.exists(f"wlgrps/{shortname}.cfg"):
+            await interaction.response.send_message("Already exists!")
+            return
+        else:
+            outfile = open(f"./wlgrps/{shortname}.cfg", "w")
+            outfile.write(f"remotelist={remoteURL}\n")
+            outfile.write(f"permissions={perms}\n")
+            outfile.close()
+        await interaction.response.send_message("created!")
 
     @app_commands.command()
     async def remove(
