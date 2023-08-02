@@ -22,7 +22,8 @@ class Group(commands.Cog, name="group"):
 
         await interaction.response.send_message("Whitelist group successfully added/updated")
         if role.id in self.client.whitelistGrps.keys():
-            self.client.whitelistGrps[role.id].squadPerms = perms
+            if perms is not None:
+                self.client.whitelistGrps[role.id].squadPerms = perms
             self.client.whitelistGrps[role.id].updateGroup()
         else:
             log.info(f"Adding {role.name} ({role.id}) as a Whitelist role")

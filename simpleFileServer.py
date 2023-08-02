@@ -32,6 +32,7 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
             try:
                 file = open(grpfile, 'rb')
                 firstline = file.readline().decode('utf-8')
+                file.seek(0)
                 if firstline.startswith('remotelist='):
                     remote = firstline.split('=')[1].strip()
                     response = requests.get(remote, headers={'Accept': 'text/html,*/*'})
