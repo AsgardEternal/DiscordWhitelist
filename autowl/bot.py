@@ -39,7 +39,8 @@ class Bot(commands.Bot):
             intents=intents,
             help_command=commands.DefaultHelpCommand(dm_help=True),
         )
-        self.mysqlpass = mysqlpass
+        self.squadjs = mysql.connector.connect(user='squadjs', password=mysqlpass,
+                                          host='asgard.orion-technologies.io', database='squadjs', use_pure=False)
 
     async def on_command(self, ctx: commands.Context):
         log.info(f"{ctx.author} ({ctx.author.id}) invoked command: {ctx.command.name}, {ctx.message}")
@@ -60,6 +61,7 @@ class Bot(commands.Bot):
 
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         disusername = after.nick if after.nick is not None else after.name
+        self.squadjs.connect()
         findcur = self.squadjs.cursor(buffered=True)
         findcur.execute(self.squadjs_findByDiscordID, [f"{after.id}"])
         if findcur.arraysize <= 0:
@@ -92,6 +94,7 @@ class Bot(commands.Bot):
                 continue
             self.whitelistGrps[addroleid].addMember(config.WhitelistMember(after.id, disusername, userdata[0]))
         self.squadjs.commit()
+        self.squadjs.close()
 
     async def setup_hook(self):
         log.info("Setting up bot")

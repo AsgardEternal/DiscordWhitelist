@@ -30,13 +30,12 @@ class Group(commands.Cog, name="group"):
                 name=role.name, roleID=role.id, permissions=perms
             )
 
-        squadjs = mysql.connector.connect(user='squadjs', password=self.client.mysqlpass,
-                                          host='asgard.orion-technologies.io', database='squadjs', use_pure=False)
+        self.client.squadjs.connect()
         membsup = []
         for memb in role.members:
             membsup.append(memb.id)
         if len(membsup) > 0:
-            memupcur = squadjs.cursor(buffered=True)
+            memupcur = self.client.squadjs.cursor(buffered=True)
             in_params = ','.join(['%s'] * len(membsup))
             sqlstate = "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
             log.info(sqlstate)
@@ -46,8 +45,8 @@ class Group(commands.Cog, name="group"):
             for data in udata:
                 self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
 
-        squadjs.commit()
-        squadjs.close()
+        self.client.squadjs.commit()
+        self.client.squadjs.close()
 
     @app_commands.command()
     async def add(
