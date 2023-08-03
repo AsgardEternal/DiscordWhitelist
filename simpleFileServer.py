@@ -36,14 +36,23 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                 if firstline.startswith('remotelist='):
                     remote = firstline.split('=')[1].strip()
                     response = requests.get(remote, headers={'Accept': 'text/html,*/*'})
-                    responsetext = response.text
-                    config = file.read().decode('utf-8')
-                    confgrps = re.findall(r"^permissions/(.+)=(.+)", config, flags=re.M)
-                    baseperm = re.match(r"^permissions=(.+)", config, flags=re.M)
-                    responsetext = re.sub(r"^Group=(.+):(.+)", fr'Group=\1:{baseperm[0]}', responsetext, flags=re.M)
-                    for congrp in confgrps:
-                        responsetext = re.sub(rf"^Group=({congrp[0]}):(.+)", rf"Group=\1:{congrp[1]}", responsetext, flags=re.M)
-                    self.wfile.write(responsetext.encode('utf-8'))
+                    print(f"remote list came back with status code {response.status_code}")
+                    if response.status_code == 200:
+                        responsetext = response.text
+                        config = file.read().decode('utf-8')
+                        confgrps = re.findall(r"^permissions/(.+)=(.+)", config, flags=re.M)
+                        baseperm = re.match(r"^permissions=(.+)", config, flags=re.M)
+                        responsetext = re.sub(r"^Group=(.+):(.+)", fr'Group=\1:{baseperm[0]}', responsetext, flags=re.M)
+                        for congrp in confgrps:
+                            responsetext = re.sub(rf"^Group=({congrp[0]}):(.+)", rf"Group=\1:{congrp[1]}", responsetext, flags=re.M)
+                        self.wfile.write(responsetext.encode('utf-8'))
+                        backupfile = open(f"./wlgrps/backup-{grpName}.cfg", 'wb')
+                        backupfile.write(responsetext.encode('utf-8'))
+                        backupfile.close()
+                    else:
+                        backupfile = open(f"./wlgrps/backup-{grpName}.cfg", 'rb')
+                        self.copyfile(backupfile, self.wfile)
+                        backupfile.close()
                 else:
                     self.copyfile(file, self.wfile)
                 file.close()
