@@ -18,19 +18,7 @@ class Group(commands.Cog, name="group"):
     def __init__(self, client: Bot):
         self.client = client
 
-    async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
-
-        await interaction.response.send_message("Whitelist group successfully added/updated")
-        if role.id in self.client.whitelistGrps.keys():
-            if perms is not None:
-                self.client.whitelistGrps[role.id].squadPerms = perms
-            self.client.whitelistGrps[role.id].updateGroup()
-        else:
-            log.info(f"Adding {role.name} ({role.id}) as a Whitelist role")
-            self.client.whitelistGrps[role.id] = config.WhitelistGroup(
-                name=role.name, roleID=role.id, permissions=perms
-            )
-
+    async def updateRole(self, role:discord.Role):
         self.client.squadjs.connect()
         membsup = []
         for memb in role.members:
@@ -48,6 +36,34 @@ class Group(commands.Cog, name="group"):
 
         self.client.squadjs.commit()
         self.client.squadjs.close()
+
+
+    async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
+
+        await interaction.response.send_message("Whitelist group successfully added/updated")
+        if role.id in self.client.whitelistGrps.keys():
+            if perms is not None:
+                self.client.whitelistGrps[role.id].squadPerms = perms
+            self.client.whitelistGrps[role.id].updateGroup()
+        else:
+            log.info(f"Adding {role.name} ({role.id}) as a Whitelist role")
+            self.client.whitelistGrps[role.id] = config.WhitelistGroup(
+                name=role.name, roleID=role.id, permissions=perms
+            )
+
+        await self.updateRole(role)
+
+    @app_commands.command()
+    async def update(
+            self,
+            interaction: discord.Interaction,
+            role: discord.Role
+    ):
+        if role.id in self.client.whitelistGrps.keys():
+            await interaction.response.send_message("updating role!")
+            await self.updateRole(role)
+        else:
+            await interaction.response.send_message("role not found!")
 
     @app_commands.command()
     async def add(
