@@ -40,9 +40,9 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                     if response.status_code == 200:
                         responsetext = response.text
                         config = file.read().decode('utf-8')
-                        confgrps = re.findall(r"^permissions/(.+)=(.+)", config, flags=re.M)
-                        baseperm = re.match(r"^permissions=(.+)", config, flags=re.M)
-                        responsetext = re.sub(r"^Group=(.+):(.+)", fr'Group=\1:{baseperm[0]}', responsetext, flags=re.M)
+                        confgrps = re.findall(r"permissions/(.+)=(.+)", config, flags=re.M)
+                        baseperm = re.findall(r"permissions=(.+)", config, flags=re.M)
+                        responsetext = re.sub(r"Group=(.+):(.+)", fr'Group=\1:{baseperm[0]}', responsetext, flags=re.M)
                         for congrp in confgrps:
                             responsetext = re.sub(rf"^Group=({congrp[0]}):(.+)", rf"Group=\1:{congrp[1]}", responsetext, flags=re.M)
                         self.wfile.write(responsetext.encode('utf-8'))
