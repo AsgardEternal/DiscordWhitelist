@@ -58,7 +58,7 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                 file.close()
             except:
                 print('failed to open file!', file=stderr)
-                print(traceback.format_exc())
+                print(traceback.format_exc(), file=stderr)
         return
 
 
