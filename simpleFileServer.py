@@ -15,9 +15,6 @@ PORT = 8000
 
 class serveRA(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text")
-        self.end_headers()
         query = parse_qs(urlparse(self.path).query)
         if 'grpName' in query:
             grpName = query['grpName'][0]
@@ -57,8 +54,14 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                     self.copyfile(file, self.wfile)
                 file.close()
             except:
-                print('failed to open file!', file=stderr)
+                print('failed to serve file!', file=stderr)
                 print(traceback.format_exc(), file=stderr)
+
+            self.send_response(200)
+            self.send_header("Content-type", "text")
+            self.end_headers()
+        else:
+            self.send_response(404)
         return
 
 
