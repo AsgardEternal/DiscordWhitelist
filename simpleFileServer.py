@@ -60,8 +60,7 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                 print('failed to serve file!', file=stderr)
                 print(traceback.format_exc(), file=stderr)
         else:
-            self.send_response(400)
-            self.end_headers()
+            self.send_response_only(400)
         return
 
 
