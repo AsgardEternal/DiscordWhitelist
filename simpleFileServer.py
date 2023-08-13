@@ -60,7 +60,7 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                 print('failed to serve file!', file=stderr)
                 print(traceback.format_exc(), file=stderr)
         else:
-            self.send_response_only(400)
+            self.send_error(400, 'please specify the group to pull from', 'no grpName specified!')
         return
 
 
