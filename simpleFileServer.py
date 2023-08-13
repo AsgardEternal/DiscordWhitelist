@@ -17,6 +17,9 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         query = parse_qs(urlparse(self.path).query)
         if 'grpName' in query:
+            self.send_response(200)
+            self.send_header("Content-type", "text")
+            self.end_headers()
             grpName = query['grpName'][0]
             grpfile = "./"
             if os.path.exists(f"./wlgrps/{grpName}.cfg"):
@@ -56,10 +59,6 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
             except:
                 print('failed to serve file!', file=stderr)
                 print(traceback.format_exc(), file=stderr)
-
-            self.send_response(200)
-            self.send_header("Content-type", "text")
-            self.end_headers()
         else:
             self.send_response(404)
         return
