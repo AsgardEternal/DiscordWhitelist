@@ -3,7 +3,7 @@ import os
 import re
 import socketserver
 import traceback
-import urllib.request
+from time import sleep
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from sys import stderr
@@ -67,9 +67,16 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
 def startServer():
     handler = serveRA
 
-    with socketserver.TCPServer(("", PORT), handler) as httpd:
-        print('starting server!')
-        httpd.serve_forever()
+    started = False
+    while not started:
+        try:
+            with socketserver.TCPServer(("", PORT), handler) as httpd:
+                print('starting server!')
+                httpd.serve_forever()
+                started = True
+        except:
+            print("server did not start trying again!")
+            sleep(5)
 
 
 startServer()
