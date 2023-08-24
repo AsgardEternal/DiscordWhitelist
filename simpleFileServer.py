@@ -67,13 +67,12 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
 def startServer():
     handler = serveRA
 
-    started = False
-    while not started:
+    while True:
+        print("trying to start...")
         try:
             with socketserver.TCPServer(("", PORT), handler) as httpd:
                 print('starting server!')
                 httpd.serve_forever()
-                started = True
         except:
             print("server did not start trying again!")
             sleep(5)
