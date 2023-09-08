@@ -46,9 +46,9 @@ class serveRA(http.server.SimpleHTTPRequestHandler):
                         for congrp in confgrps:
                             responsetext = re.sub(rf"^Group=({congrp[0]}):(.+)", rf"Group=\1:{congrp[1]}", responsetext, flags=re.M)
                         self.wfile.write(responsetext.encode('utf-8'))
-                        backupfile = open(f"./wlgrps/backup-{grpName}.cfg", 'wb')
-                        backupfile.write(responsetext.encode('utf-8'))
-                        backupfile.close()
+                        with open(f"./wlgrps/backup-{grpName}.cfg", 'wb') as backupfile:
+                            backupfile.write(responsetext.encode('utf-8'))
+                            backupfile.close()
                     else:
                         backupfile = open(f"./wlgrps/backup-{grpName}.cfg", 'rb')
                         self.copyfile(backupfile, self.wfile)
@@ -70,7 +70,7 @@ def startServer():
     while True:
         print("trying to start...")
         try:
-            with socketserver.TCPServer(("", PORT), handler) as httpd:
+            with socketserver.ThreadingTCPServer(("", PORT), handler) as httpd:
                 print('starting server!')
                 httpd.serve_forever()
         except:
