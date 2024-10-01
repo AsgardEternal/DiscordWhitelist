@@ -66,6 +66,27 @@ class Bot(commands.Bot):
 
         await self.tree.sync()
 
+        # HACK: Ensure correct members are synced to their groups when bot is started
+        for guild in self.guilds:
+            for wlgrp in self.whitelistGrps.values():
+                if role := guild.get_role(wlgrp.discord_role_id):
+                    role_member_ids = set([member.id for member in role.members])
+                    wlgrp_member_ids = set(
+                        [
+                            wlgrp_member.discord_id
+                            for wlgrp_member in wlgrp.members.values()
+                        ]
+                    )
+                    log.info(
+                        f"Checking group membership for {role.name} ({role.id}) on startup"
+                    )
+                    members_to_remove = wlgrp_member_ids - role_member_ids
+                    for member_id in members_to_remove:
+                        log.info(
+                            f"Removing {member_id} from {role.id} role group"
+                        )
+                        wlgrp.delMember(member_id)
+
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         disusername = after.nick if after.nick is not None else after.name
         self.squadjs.connect()
