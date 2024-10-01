@@ -11,21 +11,21 @@ log = logging.getLogger(__name__)
 
 
 class Bot(commands.Bot):
-    squadjs_updateDiscordID = ("UPDATE DBLog_SteamUsers SET discordID = %s "
-                               "WHERE steamID = %s")
+    squadjs_updateDiscordID = (
+        "UPDATE DBLog_SteamUsers SET discordID = %s " "WHERE steamID = %s"
+    )
 
-    squadjs_findByDiscordID = ("SELECT * FROM DBLog_SteamUsers "
-                               "WHERE discordID = %s")
+    squadjs_findByDiscordID = "SELECT * FROM DBLog_SteamUsers " "WHERE discordID = %s"
 
     whitelistGrps = {}
 
-    if not os.path.exists('./wlgrps'):
-        os.makedirs('./wlgrps')
+    if not os.path.exists("./wlgrps"):
+        os.makedirs("./wlgrps")
     else:
-        for wlfile in os.listdir('./wlgrps'):
+        for wlfile in os.listdir("./wlgrps"):
             filename = os.fsdecode(wlfile)
-            if filename.endswith('.json'):
-                file = open(f'./wlgrps/{filename}', 'r')
+            if filename.endswith(".json"):
+                file = open(f"./wlgrps/{filename}", "r")
                 wlgrp: config.WhitelistGroup = jsonpickle.decode(file.read())
                 whitelistGrps[wlgrp.discord_role_id] = wlgrp
 
@@ -39,11 +39,18 @@ class Bot(commands.Bot):
             intents=intents,
             help_command=commands.DefaultHelpCommand(dm_help=True),
         )
-        self.squadjs = mysql.connector.connect(user='squadjs', password=mysqlpass,
-                                          host='asgard.orion-technologies.io', database='squadjs', use_pure=False)
+        self.squadjs = mysql.connector.connect(
+            user="squadjs",
+            password=mysqlpass,
+            host="asgard.orion-technologies.io",
+            database="squadjs",
+            use_pure=False,
+        )
 
     async def on_command(self, ctx: commands.Context):
-        log.info(f"{ctx.author} ({ctx.author.id}) invoked command: {ctx.command.name}, {ctx.message}")
+        log.info(
+            f"{ctx.author} ({ctx.author.id}) invoked command: {ctx.command.name}, {ctx.message}"
+        )
 
     async def on_ready(self):
         log.info(f"Logged in as '{self.user}' ({self.user.id})")
@@ -77,7 +84,7 @@ class Bot(commands.Bot):
                     rmroles.remove(aftrole.id)
         log.info(f"roles found to remove from {disusername}: {rmroles}")
         for rmroleid in rmroles:
-            if not(rmroleid in self.whitelistGrps.keys()):
+            if not (rmroleid in self.whitelistGrps.keys()):
                 continue
             self.whitelistGrps[rmroleid].delMember(before.id)
 
@@ -90,9 +97,11 @@ class Bot(commands.Bot):
                     addroles.remove(befrole.id)
         log.info(f"roles found to add to {disusername}: {addroles}")
         for addroleid in addroles:
-            if not(addroleid in self.whitelistGrps.keys()):
+            if not (addroleid in self.whitelistGrps.keys()):
                 continue
-            self.whitelistGrps[addroleid].addMember(config.WhitelistMember(after.id, disusername, userdata[0]))
+            self.whitelistGrps[addroleid].addMember(
+                config.WhitelistMember(after.id, disusername, userdata[0])
+            )
         self.squadjs.commit()
         self.squadjs.close()
 

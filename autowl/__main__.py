@@ -6,6 +6,7 @@ from autowl.config import DiscordClientConfig
 
 log = logging.getLogger(__name__)
 
+
 class CustomFormat(logging.Formatter):
     grey = "\x1b[38;20m"
     yellow = "\x1b[33;20m"

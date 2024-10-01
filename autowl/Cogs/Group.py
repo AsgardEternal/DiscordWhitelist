@@ -18,29 +18,36 @@ class Group(commands.Cog, name="group"):
     def __init__(self, client: Bot):
         self.client = client
 
-    async def updateRole(self, role:discord.Role):
+    async def updateRole(self, role: discord.Role):
         self.client.squadjs.connect()
         membsup = []
         for memb in role.members:
             membsup.append(memb.id)
         if len(membsup) > 0:
             memupcur = self.client.squadjs.cursor(buffered=True)
-            in_params = ','.join(['%s'] * len(membsup))
-            sqlstate = "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
+            in_params = ",".join(["%s"] * len(membsup))
+            sqlstate = (
+                "SELECT * FROM DBLog_SteamUsers WHERE discordID IN (%s)" % in_params
+            )
             log.info(sqlstate)
             memupcur.execute(sqlstate, membsup)
 
             udata = memupcur.fetchall()
             for data in udata:
-                self.client.whitelistGrps[role.id].addMember(config.WhitelistMember(data[2], data[1], data[0]))
+                self.client.whitelistGrps[role.id].addMember(
+                    config.WhitelistMember(data[2], data[1], data[0])
+                )
 
         self.client.squadjs.commit()
         self.client.squadjs.close()
 
+    async def baseperm(
+        self, interaction: discord.Interaction, role: discord.Role, perms: str
+    ):
 
-    async def baseperm(self, interaction: discord.Interaction, role: discord.Role, perms: str):
-
-        await interaction.response.send_message("Whitelist group successfully added/updated")
+        await interaction.response.send_message(
+            "Whitelist group successfully added/updated"
+        )
         if role.id in self.client.whitelistGrps.keys():
             if perms is not None:
                 self.client.whitelistGrps[role.id].squadPerms = perms
@@ -54,11 +61,7 @@ class Group(commands.Cog, name="group"):
         await self.updateRole(role)
 
     @app_commands.command()
-    async def update(
-            self,
-            interaction: discord.Interaction,
-            role: discord.Role
-    ):
+    async def update(self, interaction: discord.Interaction, role: discord.Role):
         if role.id in self.client.whitelistGrps.keys():
             await interaction.response.send_message("updating role!")
             await self.updateRole(role)
@@ -67,28 +70,25 @@ class Group(commands.Cog, name="group"):
 
     @app_commands.command()
     async def add(
-            self,
-            interaction: discord.Interaction,
-            role: discord.Role,
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role,
     ):
         await self.baseperm(interaction, role, "reserve")
 
     @app_commands.command()
     async def addperm(
-            self,
-            interaction: discord.Interaction,
-            role: discord.Role,
-            perms: str
+        self, interaction: discord.Interaction, role: discord.Role, perms: str
     ):
         await self.baseperm(interaction, role, perms)
 
     @app_commands.command()
     async def addremote(
-            self,
-            interaction: discord.Interaction,
-            shortname: str,
-            remoteurl: str,
-            perms: str = 'whitelist'
+        self,
+        interaction: discord.Interaction,
+        shortname: str,
+        remoteurl: str,
+        perms: str = "whitelist",
     ):
         if os.path.exists(f"wlgrps/{shortname}.cfg"):
             await interaction.response.send_message("Already exists!")
@@ -102,9 +102,9 @@ class Group(commands.Cog, name="group"):
 
     @app_commands.command()
     async def remove(
-            self,
-            interaction: discord.Interaction,
-            role: discord.Role,
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role,
     ):
         if not self.client.whitelistGrps.get(role.id):
             await interaction.response.send_message(

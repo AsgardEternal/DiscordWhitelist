@@ -23,7 +23,7 @@ class WhitelistGroup:
     squadPerms: str
     members: dict[str, WhitelistMember]
 
-    def __init__(self, name, roleID, permissions='reserve'):
+    def __init__(self, name, roleID, permissions="reserve"):
         self.name = name
         self.discord_role_id = roleID
         self.squadPerms = permissions
@@ -49,7 +49,9 @@ class WhitelistGroup:
         wlFile.write(f"//{self.name}\n")
         for wlmem in self.members:
             memb = self.members[wlmem]
-            wlFile.write(f"Admin={memb.steam64}:{self.name} //{memb.discord_username} ({memb.discord_id})\n")
+            wlFile.write(
+                f"Admin={memb.steam64}:{self.name} //{memb.discord_username} ({memb.discord_id})\n"
+            )
         wlFile.close()
 
     def addMember(self, member):
@@ -59,6 +61,6 @@ class WhitelistGroup:
         pass
 
     def delMember(self, discordID):
-        self.members.pop(f'{discordID}')
+        self.members.pop(f"{discordID}")
         self.updateFile()
         self.updateWL()
